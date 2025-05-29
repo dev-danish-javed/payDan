@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        body {
+            background-color: #f7f9fc;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        fieldset {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        legend {
+            font-weight: bold;
+            padding: 0 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        input {
+            display: block;
+            width: 80%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        code {
+            display: block;
+            background-color: #f4f4f4;
+            color: #444;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            max-width: 90%;
+        }
+        .available-fields{
+            font-weight: 600;
+            opacity: 0.6;
+        }
+        .available-fields::before{
+            content: "Available fields : "
+        }
+    </style>
+
+</head>
+<body>
+<h1 class="text-3xl border-b-2 border-gray-400 pb-2">
+    Graphql Consumer
+</h1>
+
+<form id="add-wallet" onsubmit="handleAddWallet(event)">
+    <fieldset>
+        <legend>Add Wallet</legend>
+        <input id="add-wallet-userId" name="userId" placeholder="Enter userId" value="u-101">
+        <input id="add-wallet-balance" name="balance" placeholder="Enter balance" value="2000">
+        <div class="available-fields">[ id balance userId ]</div>
+        <input id="add-wallet-response-fields" name="responseFields" value="id balance userId">
+        <button>Add</button>
+        <code id="add-wallet-response"></code>
+    </fieldset>
+</form>
+
+
+<form id="get-wallet" onsubmit="handleGetWallet(event)">
+    <fieldset>
+        <legend>Get Wallet</legend>
+        <input id="get-wallet-userId" name="userId" placeholder="Enter userId" value="u-101">
+        <div class="available-fields">[ id balance userId ]</div>
+        <input id="get-wallet-response-fields" name="responseFields" value="id balance userId">
+        <button id="getWallet">Get Wallet</button>
+        <code id="get-wallet-response"></code>
+    </fieldset>
+</form>
+
+<form id="make-payment" onsubmit="handlePayment(event)">
+    <fieldset>
+        <legend>Make Payment</legend>
+        <input id="make-payment-debit-wallet" name="debitWallet" placeholder="Enter debit wallet" value="w-101">
+        <input id="make-payment-credit-wallet" name="creditWallet" placeholder="Enter credit wallet" value="w-102">
+        <input id="make-payment-amount" name="amount" placeholder="Enter payment amount" value="20">
+        <div class="available-fields">[ id debitWalletId creditWalletId amount status timestamp note error ]</div>
+        <input id="make-payment-response-fields" name="responseFields" value="id debitWalletId creditWalletId amount status timestamp note error">
+        <button id="makePayment">Make Payment</button>
+        <code id="make-payment-response"></code>
+    </fieldset>
+</form>
+
+<form id="get-payment" onsubmit="handleGetTransactions(event)">
+    <fieldset>
+        <legend>Get Payment</legend>
+        <input id="get-payment-debit-wallet" name="walletId" placeholder="Enter wallet" value="w-101">
+        <div class="available-fields">[ id debitWalletId creditWalletId amount status timestamp note error ]</div>
+        <input id="get-payment-response-fields" name="responseFields" value="id debitWalletId creditWalletId amount status timestamp note error">
+        <button id="getPayment">Get Payment</button>
+        <code id="get-payment-response"></code>
+    </fieldset>
+</form>
+
+<script>
+    const endpoint = 'http://localhost:8081/graphql';
+    const handleAddWallet = async (event) =>{
+        event.preventDefault();
+        const userId = event.target.userId.value;
+        const balance = event.target.balance.value;
+        const responseFields = event.target.responseFields.value;
+        const query = `mutation{addWallet(userId: "${userId}", balance: ${balance}){${responseFields}}}`
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({query})
+        })
+        const data = await response.json();
+        document.getElementById('add-wallet-response').textContent = JSON.stringify(data, null, 2);
+    }
+    const handleGetWallet = async (event) =>{
+        event.preventDefault();
+        const userId = event.target.userId.value;
+        const responseFields = event.target.responseFields.value;
+        let payload = {
+        "query":`{getWallet(userId:\"${userId}\"){${responseFields}}}`
+        };
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        document.getElementById('get-wallet-response').textContent = JSON.stringify(data, null, 2);
+    }
+    const handlePayment = async(event) => {
+        event.preventDefault();
+        const debitWallet = event.target.debitWallet.value;
+        const creditWallet = event.target.creditWallet.value;
+        const amount = parseFloat(event.target.amount.value);
+        const responseFields = event.target.responseFields.value;
+        let payload = {
+            "query": `mutation{makePayment(debitWalletId: \"${debitWallet}\", creditWalletId: \"${creditWallet}\", amount: ${amount}){${responseFields}}}`
+        }
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        document.getElementById('make-payment-response').textContent = JSON.stringify(data, null, 2);
+    }
+    const handleGetTransactions = async(event) => {
+        event.preventDefault();
+        const walletId = event.target.walletId.value;
+        const responseFields = event.target.responseFields.value;
+        const query = `{getTransactions(walletId: \"${walletId}\"){${responseFields}}}`;
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({query})
+        });
+        const data = await response.json();
+        document.getElementById('get-payment-response').textContent = JSON.stringify(data, null, 2);
+
+    }
+</script>
+</body>
+</html>

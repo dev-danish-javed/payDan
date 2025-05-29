@@ -1,0 +1,37 @@
+
+input TransctionInput{
+    amount: Float!
+    debitWalletId: String!
+    creditWalletId: String!
+    note: String
+}
+
+enum TRANSACTION_STATUS{
+    PROCESSING
+    FAILED
+    SUCESS
+}
+
+type TransactionOutput{
+    id: ID
+    amount: Float
+    debitWalletId: String
+    creditWalletId: String
+    note: String
+    timestamp: String
+    status : TRANSACTION_STATUS
+    error: String
+}
+
+extend type Query{
+    getTransactions(walletId: ID!): [TransactionOutput]
+}
+
+extend type Mutation{
+    makePayment(debitWalletId: String!, creditWalletId: String!, amount: Float!, note: String): TransactionOutput
+    makePaymentAlt(transaction: TransctionInput!): TransactionOutput
+}
+
+extend type Subscription {
+    onTransactionAdded(walletId: ID!): TransactionOutput
+}

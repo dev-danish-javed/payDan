@@ -1,0 +1,11 @@
+type Wallet{
+    id: ID!
+    userId: ID!
+    balance: Float!
+}
+extend type Query{
+    getWallet(userId:ID!):[Wallet]
+}
+extend type Mutation{
+    addWallet(userId: String!, balance: Float!): Wallet
+}

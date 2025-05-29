@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GraphQL Subscription Test</title>
+</head>
+<body>
+<h2>GraphQL Subscription Test</h2>
+<pre id="output">Waiting for messages...</pre>
+
+<script>
+  const socket = new WebSocket('ws://localhost:8081/graphql', 'graphql-transport-ws');
+
+  socket.onopen = () => {
+    console.log('Socket connected ✅');
+
+    // Send the init message required by graphql-ws protocol
+    socket.send(
+      JSON.stringify({
+        type: 'connection_init',
+      })
+    );
+
+    // Wait a bit before subscribing
+    setTimeout(() => {
+      socket.send(
+        JSON.stringify({
+          id: '1',
+          type: 'subscribe',
+          payload: {
+            query: `
+              subscription {
+                messageStream {
+                  id
+                  content
+                }
+              }
+            `,
+          },
+        })
+      );
+    }, 500);
+  };
+
+  socket.onmessage = (event) => {
+    console.log('Socket message:', event.data);
+    const msg = JSON.parse(event.data);
+
+    if (msg.type === 'next' && msg.payload?.data) {
+      const output = document.getElementById('output');
+      output.textContent = JSON.stringify(msg.payload.data, null, 2);
+    }
+
+    if (msg.type === 'connection_ack') {
+      console.log('Connection acknowledged by server ✅');
+    }
+
+    if (msg.type === 'complete') {
+      console.log('Subscription complete');
+    }
+  };
+
+  socket.onerror = (err) => {
+    console.error('Socket error ❌', err);
+  };
+
+  socket.onclose = () => {
+    console.log('Socket closed ❌');
+  };
+</script>
+</body>
+</html>
