@@ -1,8 +1,8 @@
 <!doctype html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 
     <style>
         body {
@@ -125,8 +125,10 @@
         <input id="make-payment-debit-wallet" name="debitWallet" placeholder="Enter debit wallet" value="w-101">
         <input id="make-payment-credit-wallet" name="creditWallet" placeholder="Enter credit wallet" value="w-102">
         <input id="make-payment-amount" name="amount" placeholder="Enter payment amount" value="20">
+        <input id="make-payment-note" name="note" placeholder="Add Note (optional)">
         <div class="available-fields">[ id debitWalletId creditWalletId amount status timestamp note error ]</div>
-        <input id="make-payment-response-fields" name="responseFields" value="id debitWalletId creditWalletId amount status timestamp note error">
+        <input id="make-payment-response-fields" name="responseFields"
+               value="id debitWalletId creditWalletId amount status timestamp note error">
         <button id="makePayment">Make Payment</button>
         <code id="make-payment-response"></code>
     </fieldset>
@@ -137,10 +139,26 @@
         <legend>Get Payment</legend>
         <input id="get-payment-debit-wallet" name="walletId" placeholder="Enter wallet" value="w-101">
         <div class="available-fields">[ id debitWalletId creditWalletId amount status timestamp note error ]</div>
-        <input id="get-payment-response-fields" name="responseFields" value="id debitWalletId creditWalletId amount status timestamp note error">
+        <input id="get-payment-response-fields" name="responseFields"
+               value="id debitWalletId creditWalletId amount status timestamp note error">
         <button id="getPayment">Get Payment</button>
         <code id="get-payment-response"></code>
     </fieldset>
+</form>
+
+<form id="subscribe-wallet" onsubmit="handleWalletSubscription(event)">
+    <fieldset>
+        <legend>Subscribe wallet payment</legend>
+        <input id="subscribe-walletId" name="walletId" value="w-101">
+        <div class="available-fields">[ id debitWalletId creditWalletId amount status timestamp note error ]</div>
+        <input id="subscribe-wallet-response-fields" name="responseFields"
+               value="id debitWalletId creditWalletId amount status timestamp note error">
+        <button>Subscribe</button>
+        <code id="subscribe-wallet-status"></code>
+        <code id="subscribe-wallet-response"></code>
+    </fieldset>
+
+
 </form>
 
 <script>
@@ -180,9 +198,11 @@
         const debitWallet = event.target.debitWallet.value;
         const creditWallet = event.target.creditWallet.value;
         const amount = parseFloat(event.target.amount.value);
+        const note = event.target.note.value;
         const responseFields = event.target.responseFields.value;
         let payload = {
-            "query": `mutation{makePayment(debitWalletId: \"${debitWallet}\", creditWalletId: \"${creditWallet}\", amount: ${amount}){${responseFields}}}`
+            "query": `mutation{makePayment(debitWalletId: \"${debitWallet}\", creditWalletId: \"${creditWallet}\",
+            amount: ${amount}, note: \"${note}\"){${responseFields}}}`
         }
 
         const response = await fetch(endpoint, {
@@ -207,6 +227,58 @@
         document.getElementById('get-payment-response').textContent = JSON.stringify(data, null, 2);
 
     }
+    const handleWalletSubscription = async(event) => {
+        event.preventDefault();
+        const walletId = event.target.walletId.value;
+        const responseFields = event.target.responseFields.value;
+        const statusElement = document.getElementById('subscribe-wallet-status');
+
+        const responseField = document.getElementById('subscribe-wallet-response')
+
+        const ws = new WebSocket("ws://localhost:8081/graphql");
+        ws.onopen = () => {
+           statusElement.textContent = "Connected";
+
+           ws.send(JSON.stringify({
+              type: "connection_init",
+              payload: {}
+           }));
+
+            setTimeout(()=>{
+                ws.send(JSON.stringify({
+                  id: "1", // any unique string
+                  type: "subscribe",
+                  payload: {
+                    query: `subscription { onTransactionAdded(walletId: "${walletId}") { ${responseFields} } }`
+                  }
+                }));},
+            1000);
+        }
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === "data") {
+              const msg = data.payload.data.onTransactionAdded;
+
+              responseField.textContent = JSON.stringify(msg, null, 2);
+              console.log(`📥 ${msg.id} - ${msg.text}`);
+            } else {
+              console.log(`📩 Other: ${event.data}`);
+              responseField.textContent = JSON.stringify(JSON.parse(event.data), null, 2);
+            }
+        }
+
+        ws.onerror = (error) => {
+            responseField.textContent = JSON.stringify(msg);
+        }
+
+        ws.onclose = (e) => {
+            console.log(e)
+            statusElement.textContent = "Disconnected"
+        }
+
+    }
+
 </script>
 </body>
 </html>
