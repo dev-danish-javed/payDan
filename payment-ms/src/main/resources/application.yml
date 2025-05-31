@@ -13,6 +13,10 @@ spring:
     websocket:
       path: /graphql
       enabled: true
+    graphiql:
+      enabled: true
+      path: /graphiql
+
   devtools:
     restart:
       enabled: true

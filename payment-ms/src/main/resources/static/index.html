@@ -162,7 +162,7 @@
 </form>
 
 <script>
-    const endpoint = 'http://localhost:8081/graphql';
+    const endpoint = 'https://paydan.onrender.com/graphql';
     const handleAddWallet = async (event) =>{
         event.preventDefault();
         const userId = event.target.userId.value;
@@ -235,7 +235,7 @@
 
         const responseField = document.getElementById('subscribe-wallet-response')
 
-        const ws = new WebSocket("ws://localhost:8081/graphql");
+        const ws = new WebSocket("wss://paydan.onrender.com/graphql");
         ws.onopen = () => {
            statusElement.textContent = "Connected";
 
