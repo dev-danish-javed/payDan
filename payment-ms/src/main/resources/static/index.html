@@ -4,6 +4,10 @@
     <meta charset="UTF-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ancizar+Sans:ital,wght@0,100..1000;1,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Ubuntu&display=swap" rel="stylesheet">
+
     <style>
         body {
             background-color: #f7f9fc;
@@ -19,6 +23,10 @@
             border-bottom: 2px solid #ccc;
             padding-bottom: 0.5rem;
             margin-bottom: 2rem;
+            font-family: "Ancizar Sans", sans-serif;
+        }
+        h2 {
+            font-family: "Ancizar Sans", sans-serif;
         }
 
         form {
@@ -40,6 +48,7 @@
             font-weight: bold;
             padding: 0 0.5rem;
             font-size: 1.1rem;
+            font-family: "Ancizar Sans", sans-serif;
         }
 
         input {
@@ -51,6 +60,7 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 1rem;
+            font-family: "Ubuntu", sans-serif;
         }
 
         button {
@@ -62,6 +72,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.2s ease-in-out;
+            font-family: "Ubuntu", sans-serif;
         }
 
         button:hover {
@@ -79,6 +90,7 @@
             margin-top: 1rem;
             white-space: pre-wrap;
             max-width: 90%;
+            font-family: "JetBrains Mono", monospace;
         }
         .available-fields{
             font-weight: 600;
@@ -91,9 +103,51 @@
 
 </head>
 <body>
-<h1 class="text-3xl border-b-2 border-gray-400 pb-2">
+<h1 class="">
     Graphql Consumer
 </h1>
+
+<section class="info">
+    <form style="padding-top:0.5rem;">
+        <h2>About the app</h2>
+        The app is designed to perform transactions based on wallets.
+        <br>
+        It's focused on to display GraphQL implementation.
+        <br><br>
+        <fieldset>
+            <legend>GraphQL Highlights</legend>
+            <ul style="padding:0 2em;margin:0;">
+                <li>Single Endpoint – One URL handles all queries/mutations</li>
+                <li>Clients shapes the responses and server resolves</li>
+                <li>No underfetching or overfetching</li>
+                <li>Typed Schema – Everything is defined via types</li>
+                <li>Self Documenting endpoints</li>
+            </ul>
+        </fieldset>
+        <fieldset>
+            <legend>App Description</legend>
+            It is designed like a wallet payment system.
+            <ul>
+                <li>Add wallet to user</li>
+                <li>Get list of wallets attached to the user</li>
+                <li>Transfer funds from one wallet to other</li>
+                <li>Get details for the transaction</li>
+                <li>Subscribe to a wallet and get real time updates on any payment</li>
+            </ul>
+        </fieldset>
+        <fieldset>
+            <legend>Steps to use</legend>
+            <ul>
+                <li>Perform add wallet to add wallets to user</li>
+                <li>Use get wallet to make sure your wallet is added</li>
+                <li>Make payment with the desired wallets and add note</li>
+                <li>Find all the payments made from the wallet with get payment</li>
+                <li>Add a wallet to watch list, as soon as a transaction is made, this section will update</li>
+                <li><strong>Edit the field list to only get the fields you want in response</strong></li>
+            </ul>
+        </fieldset>
+    </form>
+</section>
 
 <form id="add-wallet" onsubmit="handleAddWallet(event)">
     <fieldset>
